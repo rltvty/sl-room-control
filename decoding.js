@@ -108,47 +108,50 @@ COMMANDS IN HEX, FROM PREVIOUS RESEARCH
 
 /* CREATE VARS FOR THESE THINGS */
 
-/*
+var grouping = 2;
+
 var statics = {
-    "7":      Buffer.from("0000003bbd673f", 'hex'),
-    "4":      Buffer.from("0000001714513f", 'hex'),
-    "0":      Buffer.from("0000007f41353f", 'hex'),
-    "-5":     Buffer.from("0000005022163f", 'hex'),
-    "-9":     Buffer.from("0000000000003f", 'hex'),
-    "-35.14": Buffer.from("000000a95d093e", 'hex')
+    "7":      Buffer.from(reverse("3bbd673f", grouping), 'hex'),
+    "4":      Buffer.from(reverse("1714513f", grouping), 'hex'),
+    "0":      Buffer.from(reverse("7f41353f", grouping), 'hex'),
+    "-5":     Buffer.from(reverse("5022163f", grouping), 'hex'),
+    "-9":     Buffer.from(reverse("0000003f", grouping), 'hex'),
+    "-35.14": Buffer.from(reverse("a95d093e", grouping), 'hex')
 };
 
 console.log(Object.keys(statics));
 
 var moving_down = [
-    Buffer.from("000000cae0fc3e", 'hex'),
-    Buffer.from("00000091c1f93e", 'hex'),
-    Buffer.from("0000001e83f33e", 'hex'),
-    Buffer.from("0000007525ea3e", 'hex'),
-    Buffer.from("0000005e89da3e", 'hex'),
-    Buffer.from("000000b62bd13e", 'hex'),
-    Buffer.from("0000006670be3e", 'hex'),
-    Buffer.from("00000089f3b13e", 'hex'),
-    Buffer.from("00000012b5ab3e", 'hex'),
-    Buffer.from("0000008ada953e", 'hex'),
-    Buffer.from("000000199c8f3e", 'hex'),
-    Buffer.from("000000a95d893e", 'hex'),
-    Buffer.from("000000391f833e", 'hex'),
-    Buffer.from("0000002083733e", 'hex'),
-    Buffer.from("000000b0446d3e", 'hex'),
-    Buffer.from("0000007d0c4e3e", 'hex'),
-    Buffer.from("0000000fce473e", 'hex'),
-    Buffer.from("0000002c513b3e", 'hex'),
-    Buffer.from("000000bd12353e", 'hex'),
-    Buffer.from("0000004dd42e3e", 'hex'),
-    Buffer.from("000000dd95283e", 'hex'),
-    Buffer.from("0000006d57223e", 'hex'),
-    Buffer.from("000000fa181c3e", 'hex'),
-    Buffer.from("0000008ada153e", 'hex'),
-    Buffer.from("0000001a9c0f3e", 'hex')
+    parseInt(reverse("cae0fc3e", grouping), 16),
+    parseInt(reverse("91c1f93e", grouping), 16),
+    parseInt(reverse("1e83f33e", grouping), 16),
+    parseInt(reverse("7525ea3e", grouping), 16),
+    parseInt(reverse("5e89da3e", grouping), 16),
+    parseInt(reverse("b62bd13e", grouping), 16),
+    parseInt(reverse("6670be3e", grouping), 16),
+    parseInt(reverse("89f3b13e", grouping), 16),
+    parseInt(reverse("12b5ab3e", grouping), 16),
+    parseInt(reverse("8ada953e", grouping), 16),
+    parseInt(reverse("199c8f3e", grouping), 16),
+    parseInt(reverse("a95d893e", grouping), 16),
+    parseInt(reverse("391f833e", grouping), 16),
+    parseInt(reverse("2083733e", grouping), 16),
+    parseInt(reverse("b0446d3e", grouping), 16),
+    parseInt(reverse("7d0c4e3e", grouping), 16),
+    parseInt(reverse("0fce473e", grouping), 16),
+    parseInt(reverse("2c513b3e", grouping), 16),
+    parseInt(reverse("bd12353e", grouping), 16),
+    parseInt(reverse("4dd42e3e", grouping), 16),
+    parseInt(reverse("dd95283e", grouping), 16),
+    parseInt(reverse("6d57223e", grouping), 16),
+    parseInt(reverse("fa181c3e", grouping), 16),
+    parseInt(reverse("8ada153e", grouping), 16),
+    parseInt(reverse("1a9c0f3e", grouping), 16)
 ];
 
+console.log(moving_down);
 
+/*
 for (var offset = 0; offset < 12; offset += 1) {
     console.log('');
     console.log('TESTING OFFSET: ' + offset);
@@ -215,22 +218,23 @@ for (var offset = 0; offset < 12; offset += 1) {
 
 /* NOT THE RESULTS I WANTED.  MAYBE ITS JUST A LINEAR REGRESSION? */
 
+
 //   Y        X
 var values = {
-    "7":      parseInt("0000003bbd673f", 16),
-    "4":      parseInt("0000001714513f", 16),
-    "0":      parseInt("0000007f41353f", 16),
-    "-5":     parseInt("0000005022163f", 16),
-    "-9":     parseInt("0000000000003f", 16),
-    "-35.14": parseInt("000000a95d093e", 16)
+    "7":      parseInt(reverse("03bbd673f", grouping), 16),
+    "4":      parseInt(reverse("01714513f", grouping), 16),
+    "0":      parseInt(reverse("07f41353f", grouping), 16),
+    "-5":     parseInt(reverse("05022163f", grouping), 16),
+    "-9":     parseInt(reverse("00000003f", grouping), 16),
+    "-35.14": parseInt(reverse("0a95d093e", grouping), 16)
 };
 
 console.log('Values:');
 console.log(values);
 
-var m = (4-7)/(values["4"] - values["7"]);
+var m = (7 + 35.14)/(values["7"] - values["-35.14"]);
 
-var b = 7 - (m * values["7"]);
+var b = 0 - (m * values["0"]);
 
 console.log('Equation: y=' + m + 'x + ' + b);
 
@@ -246,3 +250,28 @@ console.log('-9 is ' + y(values["-9"]));
 console.log('-35.14 is ' + y(values["-35.14"]));
 
 /* DID I DO THIS WRONG? SEEMS LIKE NOT LINEAR REGRESSION EITHER :( */
+
+//Lets write a string reversing function.
+
+function reverse(input, grouping) {
+    var output = '';
+    if (grouping === undefined) {
+        grouping = 1
+    }
+    var start = 0 - grouping;
+    while (start >= -1*input.length) {
+        output += input.substr(start, grouping);
+        start = start - grouping;
+    }
+    return output;
+}
+
+function test_reverse() {
+    var passing = true;
+    console.log('reverse("nachos") === "' + reverse('nachos') + '" === "sohcan"');
+    passing = passing && reverse('nachos') === 'sohcan';
+    console.log('reverse("nachos", 2) === "' + reverse('nachos') + '" === "oschna"');
+    passing = passing && reverse('nachos', 2) === 'oschna';
+    return passing;
+}
+

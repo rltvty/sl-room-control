@@ -242,12 +242,35 @@ function y(x) {
     return (m*x) + b;
 }
 
+console.log();
+console.log('Linear regression output: ');
 console.log(' 7 is ' + y(values["7"]));
 console.log(' 4 is ' + y(values["4"]));
 console.log(' 0 is ' + y(values["0"]));
 console.log('-5 is ' + y(values["-5"]));
 console.log('-9 is ' + y(values["-9"]));
 console.log('-35.14 is ' + y(values["-35.14"]));
+
+function poly_regression(y) {
+    y = parseFloat(y);
+    return (-4145.268571 * y * y) + (421660.399257 * y) + 1060764470.238770
+}
+
+function poly_test(y) {
+    console.log(values[y] + ' is ' + poly_regression(y)+ '\tdifference of: ' + ((values[y] - poly_regression(y))*100/values[y]) + '%');
+}
+
+console.log();
+console.log('Poly-2 regression output: ');
+poly_test("7");
+poly_test("4");
+poly_test("0");
+poly_test("-5");
+poly_test("-9");
+poly_test("-35.14");
+
+
+
 
 /* DID I DO THIS WRONG? SEEMS LIKE NOT LINEAR REGRESSION EITHER :( */
 

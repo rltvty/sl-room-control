@@ -98,15 +98,3 @@ function parseData(data) {
     buf.readUIntLE(offset, byteLength)
     */
 }
-
-/* SUB at waldos, not connected:
-
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
- UC��DAdSL18sAISPK00:0A:92:C8:34:CB
-
- */
-

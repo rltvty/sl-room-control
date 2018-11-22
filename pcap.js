@@ -8,13 +8,14 @@ pcap_session.on("packet", function (raw_packet) {
             if (packet.payload.payload.saddr.addr[3] === 100) {
                 if (packet.payload.payload.payload.data) {
                     const o = parseData(packet.payload.payload.payload.data);
-                    if (o.type === 22096) {
+                    if (o.type === 21325) {
                         //console.log('Buffer:');
                         //console.log(packet.payload.payload.payload.data);
                         //console.log('String:');
                         //console.log([packet.payload.payload.payload.data.toString('ascii')]);
                         //console.log('Object:');*/
-                        console.log(o.endpoint + "\t" + (parseInt(o.level * 1000) / 1000) + "\t" + o.other);
+                        //console.log(o.endpoint + "\t" + (parseInt(o.level * 1000) / 1000) + "\t" + o.other);
+                        console.log(o);
                     }
                 }
             }
@@ -38,10 +39,14 @@ function parseData(data) {
         o.address = data.toString("ascii", 28);
         o.mode = "Speaker Info";
         break;
-    case 21325:
-        o.mode = "Something 1";
-        o.umm = data.readUInt16LE(4);
-        o.other = data.toString("ascii", 8);
+        case 21325:
+        o.mode = "Meter Level?"; //so far only tested without any input signal playing
+        o.umm = data.readUInt16LE(4); //always 39829 for 328AI in my room
+        o.other = data.toString("hex", 8, 12); //always `64:00:66:00` for 328AI in my room
+        o.endpoint = data.toString("ascii", 12, 16); //always 'levl'
+        o.more = data.toString("hex", 16, 20); //always `00:00:05:00` for 328AI in my room
+        o.level = data.readUInt16LE(20); //speaker output level meter 0..??
+        o.extra = data.toString("hex", 22); //always `00:00:00:00:00:00:00:00:03:00:00:00:00:01:00:06:00:01:00:04:00:07:00:05:00:00:00`
         break;
     case 16973:
         o.mode = "Something 2";

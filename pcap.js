@@ -7,12 +7,12 @@ pcap_session.on('packet', function (raw_packet) {
     var packet = pcap.decode.packet(raw_packet);
     if (packet.payload.payload.saddr) {
         if (packet.payload.payload.saddr.addr) {
-            if (packet.payload.payload.saddr.addr[3] === 101) {
+            if (packet.payload.payload.saddr.addr[3] === 100) {
                 if (packet.payload.payload.payload.data) {
                     var o = parseData(packet.payload.payload.payload.data);
                     if (o['type'] === 22096) {
                         //console.log('Buffer:');
-                        // console.log(packet.payload.payload.payload.data);
+                        //console.log(packet.payload.payload.payload.data);
                         //console.log('String:');
                         //console.log([packet.payload.payload.payload.data.toString('ascii')]);
                         //console.log('Object:');*/

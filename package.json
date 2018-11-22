@@ -2,6 +2,7 @@
   "name": "studiolive",
   "version": "0.0.1",
   "dependencies": {
-    "websocket" : "^1.0.28"
+    "websocket": "^1.0.28",
+    "pcap": ""
   }
 }

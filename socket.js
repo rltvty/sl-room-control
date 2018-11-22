@@ -17,7 +17,7 @@ var subscription_request = Buffer.from('55430001a7004a4d660064009d0000007b226964
 var keep_alive = Buffer.from('5543000106004b4166006400', 'hex');
 
 var client = new net.Socket({'allowHalfOpen': true});
-client.connect(48207, '192.168.0.100', function() {
+client.connect(51383, '192.168.0.101', function() {
     console.log('Connected');
     client.write(init_request);
     setTimeout(function()  {

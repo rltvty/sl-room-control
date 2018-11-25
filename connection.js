@@ -7,8 +7,13 @@ const subscription_request = Buffer.from('55430001a7004a4d660064009d0000007b2269
 //UCKAed
 const keep_alive = Buffer.from('5543000106004b4166006400', 'hex');
 
+const wink_on = Buffer.from('554300011900505666006400537065616b65722f77696e6b0000000000803f', 'hex');
+const wink_off = Buffer.from('554300011900505666006400537065616b65722f77696e6b00000000000000', 'hex');
+
 
 module.exports.connection = (data) => {
+    var wink = false;
+
     if (data && data.port && data.sender) {
         const client = new net.Socket({'allowHalfOpen': true});
 
@@ -25,6 +30,12 @@ module.exports.connection = (data) => {
                 console.log('starting keep alive');
                 setInterval(function () {
                     client.write(keep_alive);
+                    if (wink) {
+                        client.write(wink_off);
+                    } else {
+                        client.write(wink_on);
+                    }
+                    wink = !wink;
                     //console.log('keep alive sent')
                 }, 3000)
             }, 500);

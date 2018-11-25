@@ -1,4 +1,4 @@
-const pcap = require("experiments/pcap");
+const pcap = require("pcap");
 const pcap_session = pcap.createSession("en0", "");
 
 pcap_session.on("packet", function (raw_packet) {
@@ -8,7 +8,7 @@ pcap_session.on("packet", function (raw_packet) {
             if (packet.payload.payload.saddr.addr[3] === 100) {
                 if (packet.payload.payload.payload.data) {
                     const o = parseData(packet.payload.payload.payload.data);
-                    if (o.type === 21325) {
+                    if (o.type === 22096) {
                         //console.log('Buffer:');
                         //console.log(packet.payload.payload.payload.data);
                         //console.log('String:');

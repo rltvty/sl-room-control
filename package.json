@@ -1,8 +1,33 @@
 {
-  "name": "studiolive",
+  "name": "sl-speaker-control",
   "version": "0.0.1",
   "dependencies": {
-    "websocket": "^1.0.28",
-    "pcap": ""
-  }
+    "express": "^4.16.4",
+    "pcap": "",
+    "websocket": "^1.0.28"
+  },
+  "description": "An API for controlling PreSonus StudioLive Speakers",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rltvty/sl-room-control.git"
+  },
+  "keywords": [
+    "presonus",
+    "studiolive",
+    "328AI",
+    "315AI",
+    "312AI",
+    "18SAI"
+  ],
+  "author": "Eric Pinzur",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rltvty/sl-room-control/issues"
+  },
+  "homepage": "https://github.com/rltvty/sl-room-control#readme"
 }

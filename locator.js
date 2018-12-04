@@ -16,7 +16,7 @@ const speakerWatch = pcap.createSession("en0", "ip broadcast");
 
 speakerWatch.on("packet", function (raw_packet) {
     const packet = pcap.decode.packet(raw_packet);
-    const data = shared.udpDecode(shared.getData(packet));
+    const data = shared.decodeData(shared.getData(packet), "locator.js");
     if (data) {
         switch (data.mode) {
             case 'broadcast':
@@ -26,7 +26,6 @@ speakerWatch.on("packet", function (raw_packet) {
                 }
                 break;
             default:
-                data.source = "locator";
                 console.log(data);
                 break;
         }

@@ -7,52 +7,34 @@ const subscription_request = Buffer.from('55430001a7004a4d660064009d0000007b2269
 //UCKAed
 const keep_alive = Buffer.from('5543000106004b4166006400', 'hex');
 
-const wink_on = Buffer.from('554300011900505666006400537065616b65722f77696e6b0000000000803f', 'hex');
-const wink_off = Buffer.from('554300011900505666006400537065616b65722f77696e6b00000000000000', 'hex');
-
-
-module.exports.connection = (data) => {
-    var wink = false;
-
-    if (data && data.port && data.sender) {
+module.exports.connection = (speakerInfo, speakerEvents) => {
+    if (speakerInfo && speakerInfo.port && speakerInfo.sender) {
         const client = new net.Socket({'allowHalfOpen': true});
 
-        client.connect(data.port, data.sender, function () {
-            console.log('Connected, sending init command');
+        client.connect(speakerInfo.port, speakerInfo.sender, function () {
             client.write(init_request);
-            console.log('Init command sent');
-            setTimeout(function () {
-                console.log('Sending 2nd command now');
-                client.write(subscription_request);
-                console.log('2nd command sent');
-            }, 100);
-            setTimeout(function () {
-                console.log('starting keep alive');
-                setInterval(function () {
-                    client.write(keep_alive);
-                    if (wink) {
-                        client.write(wink_off);
-                    } else {
-                        client.write(wink_on);
-                    }
-                    wink = !wink;
-                    //console.log('keep alive sent')
-                }, 3000)
-            }, 500);
+            client.write(subscription_request);
+            setInterval(() => { client.write(keep_alive); }, 3000);
+            speakerEvents.emit('open');
         });
 
-        client.on('data', function (data) {
-            data.source = 'connection';
-            console.log(shared.udpDecode(data));
+        client.on('data', (tcpData) => {
+            const data = shared.decodeData(tcpData, "connection.js");
+            if (data) {
+                speakerEvents.emit(data.mode, data);
+            }
         });
 
-        client.on('close', function () {
-            console.log('Connection closed');
+        client.on('close', () => {
+            speakerEvents.emit('close')
         });
 
-        client.on('error', function (error) {
-            console.log('ERROR');
-            console.log(error);
+        client.on('error', (error) => {
+            speakerEvents.emit('error', error);
         });
+
+        return client;
     }
+
+    return null;
 };

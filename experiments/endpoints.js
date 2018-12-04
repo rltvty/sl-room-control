@@ -1,6 +1,7 @@
 module.exports.endpoints = {
     "Speaker/75hz": "0..1",  //100Hz high pass filter on/off
     "Speaker/contour": "0/0.5/1", //0: Normal, 0.5: LBR Source, 1: Floor Monitor
+    "Speaker/clip": "0/1", //speaker digital clip LED flash
     "Speaker/limit": "0/1", //Speaker limit LED flash?
     "Speaker/line/ch1/delay": "0..1", //Actual range is 0..500 ms
     "Speaker/line/ch1/delay_enable": "0/1",

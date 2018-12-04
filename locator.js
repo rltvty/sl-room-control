@@ -12,7 +12,7 @@ speakerEvents.on('new', (data) => {
     speakers[data.address] = data;
 });
 
-const speakerWatch = pcap.createSession("en0", "ip broadcast");
+const speakerWatch = pcap.createSession("en4", "ip broadcast");
 
 speakerWatch.on("packet", function (raw_packet) {
     const packet = pcap.decode.packet(raw_packet);

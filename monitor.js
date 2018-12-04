@@ -5,8 +5,8 @@ const connection = require("./connection");
 
 module.exports.monitor = (data) => {
 
-    const filter = `src host ${data.sender} && not ip broadcast`;
-    const monitor = pcap.createSession("en0", filter);
+    const filter = `src host ${data.sender} && not ip broadcast && udp`;
+    const monitor = pcap.createSession("en4", filter);
     const speakerEvents = new eventEmitter();
     const conn = connection.connection(data, speakerEvents);
     let wink = false;
@@ -36,7 +36,7 @@ module.exports.monitor = (data) => {
     });
 
     speakerEvents.on('level', (data) => {
-        //console.log(`Level now at ${data.level} from ${data.source}`);
+        console.log(`Level now at ${data.level} from ${data.source}`);
     });
 
     speakerEvents.on('settings', (data) => {
@@ -55,6 +55,5 @@ module.exports.monitor = (data) => {
     return {
         sendCommand : sendCommand
     }
-
 };
 

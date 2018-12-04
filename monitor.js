@@ -21,10 +21,10 @@ module.exports.monitor = (data) => {
 
     speakerEvents.on('open', () => {
         console.log('Speaker Connected');
-        setInterval(() => {
-            conn.write(shared.getCommand('Speaker/wink', wink ? 0 : 1));
+        /*setInterval(() => {
+            sendCommand('Speaker/wink', wink ? 0 : 1);
             wink = !wink;
-        }, 5000)
+        }, 5000)*/
     });
 
     speakerEvents.on('close', () => {
@@ -46,6 +46,15 @@ module.exports.monitor = (data) => {
     speakerEvents.on('unknown', (data) => {
         //console.log(data);
     });
+
+    const sendCommand = (endpoint, value) => {
+        conn.write(shared.getCommand(endpoint, value));
+        return true;
+    };
+
+    return {
+        sendCommand : sendCommand
+    }
 
 };
 

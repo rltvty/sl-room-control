@@ -33,3 +33,25 @@ speakerWatch.on("packet", function (raw_packet) {
     }
 });
 
+module.exports.speakers = () => {
+    const list = [];
+    for (const address in speakers) {
+        if (speakers.hasOwnProperty(address)) {
+            const speaker = speakers[address];
+            list.push({
+                'address': address,
+                'ip': speaker.sender,
+                'port': speaker.port,
+                'name': speaker.name
+            })
+        }
+    }
+    return list;
+};
+
+module.exports.sendCommand = (address, endpoint, value) => {
+    if (address in speakers) {
+        return speakers[address].monitor.sendCommand(endpoint, value);
+    }
+    return false;
+};

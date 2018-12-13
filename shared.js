@@ -1,4 +1,5 @@
 const findNulls = new RegExp("\u0000", "g");
+const speaker_config = require("./speaker_config.json");
 
 module.exports.getNetworkDevices = () => {
     const choices = [];
@@ -28,7 +29,7 @@ module.exports.decodeData = (data, source) => {
                     source : source,
                     mode : "broadcast",
                     port : data.readUInt16LE(4),
-                    name : data.toString("ascii", 16, 28).replace(findNulls,' ').trim(),
+                    model : data.toString("ascii", 16, 28).replace(findNulls,' ').trim(),
                     address: data.toString("ascii", 28, 45)
                 };
             case 21325:
@@ -57,6 +58,17 @@ module.exports.decodeData = (data, source) => {
         }
     }
     return null;
+};
+
+module.exports.getSpeakerDetails = (address) => {
+    if (speaker_config.hasOwnProperty(address)) {
+        return speaker_config[address]
+    } else {
+        return {
+            name: address,
+            description: "Pls add this speaker to `speaker_config.json`"
+        }
+    }
 };
 
 module.exports.getSender = (packet) => {

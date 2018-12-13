@@ -25,7 +25,7 @@ switch (devices.length) {
 const speakerWatch = pcap.createSession(device, "ip broadcast");
 
 speakerEvents.on('new', (data) => {
-    console.log(`Found new ${data.name} at ${data.sender}:${data.port}`);
+    console.log(`Found new ${data.model} at ${data.sender}:${data.port} with name: ${data.name}`);
     data.monitor = monitors.monitor(device, data);
     speakers[data.address] = data;
 });
@@ -38,7 +38,7 @@ speakerWatch.on("packet", function (raw_packet) {
             case 'broadcast':
                 if (!(data.address in speakers)) {
                     data.sender = shared.getSender(packet);
-                    speakerEvents.emit('new', data);
+                    speakerEvents.emit('new', Object.assign(data, shared.getSpeakerDetails(data.address)));
                 }
                 break;
             default:
@@ -57,17 +57,33 @@ module.exports.speakers = () => {
             list.push({
                 'address': address,
                 'ip': speaker.sender,
+                'model': speaker.model,
+                'name': speaker.name,
                 'port': speaker.port,
-                'name': speaker.name
             })
         }
     }
     return list;
 };
 
-module.exports.sendCommand = (address, endpoint, value) => {
-    if (address in speakers) {
-        return speakers[address].monitor.sendCommand(endpoint, value);
+const getSpeaker = (addressOrName) => {
+    if (addressOrName in speakers) {
+        return speakers[addressOrName];
+    }
+    for (let address in speakers) {
+        if (speakers.hasOwnProperty(address)) {
+            if (speakers[address].name === addressOrName) {
+                return speakers[address];
+            }
+        }
+    }
+    return null;
+};
+
+module.exports.sendCommand = (addressOrName, endpoint, value) => {
+    const speaker = getSpeaker(addressOrName);
+    if (speaker) {
+        return speaker.monitor.sendCommand(endpoint, value);
     }
     return false;
 };

@@ -3,10 +3,10 @@ const pcap = require("pcap");
 const shared = require("./shared.js");
 const connection = require("./connection");
 
-module.exports.monitor = (data) => {
+module.exports.monitor = (device, data) => {
 
     const filter = `src host ${data.sender} && not ip broadcast && udp`;
-    const monitor = pcap.createSession("en4", filter);
+    const monitor = pcap.createSession(device, filter);
     const speakerEvents = new eventEmitter();
     const conn = connection.connection(data, speakerEvents);
     let wink = false;
@@ -36,7 +36,7 @@ module.exports.monitor = (data) => {
     });
 
     speakerEvents.on('level', (data) => {
-        console.log(`Level now at ${data.level} from ${data.source}`);
+        //console.log(`Level now at ${data.level} from ${data.source}`);
     });
 
     speakerEvents.on('settings', (data) => {

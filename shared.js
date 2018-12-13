@@ -1,5 +1,25 @@
 const findNulls = new RegExp("\u0000", "g");
 
+module.exports.getNetworkDevices = () => {
+    const choices = [];
+    const devices = require('os').networkInterfaces();
+    for (let key in devices) {
+        if (devices.hasOwnProperty(key) && key.startsWith('en')) {
+            const device = devices[key];
+            for (let info_index in device) {
+                if (device.hasOwnProperty(info_index)) {
+                    const info = device[info_index];
+                    if (info['family'] === 'IPv4') {
+                        choices.push({ name: key, address : info['address'], mac: info['mac'] });
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return choices;
+};
+
 module.exports.decodeData = (data, source) => {
     if (data && data.length > 20 && data.toString("ascii", 0, 2) === "UC") {
         switch (data.readUInt16LE(6)) {

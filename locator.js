@@ -66,7 +66,7 @@ module.exports.speakers = () => {
     return list;
 };
 
-const getSpeaker = (addressOrName) => {
+module.exports.getSpeaker = (addressOrName) => {
     if (addressOrName in speakers) {
         return speakers[addressOrName];
     }
@@ -78,12 +78,4 @@ const getSpeaker = (addressOrName) => {
         }
     }
     return null;
-};
-
-module.exports.sendCommand = (addressOrName, endpoint, value) => {
-    const speaker = getSpeaker(addressOrName);
-    if (speaker) {
-        return speaker.monitor.sendCommand(endpoint, value);
-    }
-    return false;
 };

@@ -128,3 +128,67 @@ testCommand("Speaker/remote_lim_on", 1, "55:43:00:01:22:00:50:56:66:00:64:00:537
 testCommand("Speaker/line/ch1/volume", Buffer.from("e963303f", "hex").readFloatLE(0), "55:43:00:01:24:00:50:56:66:00:64:00:537065616b65722f6c696e652f6368312f766f6c756d65:00:00:00:e9:63:30:3f");
 testCommand("Speaker/line/ch1/volume_enable", 1, "55:43:00:01:2b:00:50:56:66:00:64:00:537065616b65722f6c696e652f6368312f766f6c756d655f656e61626c65:00:00:00:00:00:80:3f");
 */
+
+const getValueOrError = (obj, paramName, validChoices) => {
+    if (!obj.hasOwnProperty(paramName)) {
+        return new Error(`'${paramName}' is required`);
+    }
+    const value = obj[paramName];
+    if (Array.isArray(validChoices)) {
+        if (!validChoices.includes(value)) {
+            return new Error(`${paramName} must be one of these values: ${validChoices.join(', ')}`);
+        }
+    } else if (typeof (validChoices) === 'string') {
+        if (validChoices.includes('-')) { //range of values, including non-integers
+            const range = validChoices.split('-');
+            if (value < parseInt(range[0]) || value > parseInt(range[1])) {
+                return new Error(`'${paramName}' must be between ${range[0]} and ${range[1]}`);
+            }
+        } else if (validChoices.includes('/')) { //choice of two or more specific values
+            if (!validChoices.split('/').includes(value)) {
+                return new Error(`'${paramName}' must be one of these values: ${validChoices.split('/').join(', ')}`);
+            }
+        } else if (validChoices.includes('..')) { //range of integers
+            const range = validChoices.split('..');
+            const actualChoices = [];
+            for (let choice = parseInt(range[0]); choice <= parseInt(range[1]); choice += 1) {
+                actualChoices.push(choice);
+            }
+            if (!actualChoices.includes(value)) {
+                return new Error(`'${paramName}' must be one of these values: ${actualChoices.join(', ')}`);
+            }
+        }
+    }
+    return value;
+};
+
+module.exports.getValueOrError = getValueOrError;
+
+
+/*
+const testValueOrError = (obj, paramName, validChoices, expectedResult) => {
+    const result = getValueOrError(obj, paramName, validChoices);
+    if (result instanceof Error) {
+        if (expectedResult === '<Error>' || result.message === expectedResult) {
+            console.log(`SUCCESS! Get '${paramName}' returned Error: ${result.message}`);
+        } else {
+            console.log(`FAILURE! Get '${paramName}' returned Error: ${result.message}`);
+        }
+    } else {
+        if (result=== expectedResult) {
+            console.log(`SUCCESS! Get '${paramName}' returned Value: ${result}`);
+        } else {
+            console.log(`FAILURE! Get '${paramName}' returned Value: ${result}`);
+        }
+    }
+};
+
+testValueOrError({}, 'taco', null, '<Error>');
+testValueOrError({ 'freq' : '10' }, 'freq', '20-20000', '<Error>');
+testValueOrError({ 'freq' : '56' }, 'freq', '20-20000', '56');
+testValueOrError({ 'band' : '9' }, 'band', '1..8', '<Error>');
+testValueOrError({ contour: 'normal' }, 'contour', ['normal', 'not-normal'], 'normal');
+testValueOrError({ feeling: 'sad' }, 'feeling', ['happy', 'okay'], '<Error>');
+testValueOrError({ height: 'giant' }, 'height', 'tall/short/normal', '<Error>');
+testValueOrError({ build: 'thin' }, 'build', 'thin/athletic', 'thin');
+*/

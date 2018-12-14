@@ -1,10 +1,27 @@
 const endpoints = require('./experiments/endpoints.js');
 const locator = require('./locator.js');
+const shared = require('./shared.js');
+const bodyParser = require('body-parser');
 const express = require('express');
+
 const app = express();
 const port = 3000;
 
 let wink = false;
+
+
+const getValueFromBodyOrSend400 = (req, res, paramName, validChoices) => {
+    const valueOrError = shared.getValueOrError(req.body, paramName, validChoices);
+    if (valueOrError instanceof  Error) {
+        res.status(400).send({ error: valueOrError.message });
+    } else {
+        return valueOrError;
+    }
+};
+
+
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
@@ -32,12 +49,34 @@ app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
     res.send(req.speaker.monitor.sendCommand(req.params["endpoint"], parseFloat(req.params["value"])));
 });
 
-app.post('/speaker/:speaker/contour/:value', (req, res) => {
-
+app.post('/speaker/:speaker/contour', (req, res) => {
+    const value = getValueFromBodyOrSend400(req, res, 'value', ['normal', 'lbr_source', 'floor_monitor']);
+    switch (value) {
+        case 'normal':
+            req.speaker.monitor.sendCommand('Speaker/contour', 0);
+            break;
+        case 'lbr_source':
+            req.speaker.monitor.sendCommand('Speaker/contour', 0.5);
+            break;
+        case 'floor_monitor':
+            req.speaker.monitor.sendCommand('Speaker/contour', 1);
+            break;
+    }
+    res.sendStatus(201);
 });
 
+//not found route
+app.use((req, res, next) => {
+    res.status(404).send("Sorry can't find that!");
+});
 
+//error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
 
+//start server
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 /*

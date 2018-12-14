@@ -2,8 +2,9 @@
   "name": "sl-speaker-control",
   "version": "0.0.1",
   "dependencies": {
+    "body-parser": "~1.18.3",
     "express": "^4.16.4",
-    "pcap": "",
+    "pcap": "~2.1.0",
     "websocket": "^1.0.28"
   },
   "description": "An API for controlling PreSonus StudioLive Speakers",

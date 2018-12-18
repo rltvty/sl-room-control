@@ -137,3 +137,9 @@ module.exports.getValueOrError = (obj, paramName, validChoices) => {
     return value;
 };
 
+module.exports.getValueFromMap = (map, input) => {
+    if (map.hasOwnProperty(input)) {
+        return map[input];
+    }
+    return null;
+};

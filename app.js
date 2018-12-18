@@ -7,7 +7,9 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-let wink = false;
+const contourMap = {'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1};
+const onOffMap = {'off': 0, 'on': 1};
+const winkMap = {'blue': 0, 'white': 1};
 
 
 const getValueFromBodyOrSend400 = (req, res, paramName, validChoices) => {
@@ -39,31 +41,113 @@ app.param('speaker', function(req, res, next, id) {
     }
 });
 
-app.post('/speaker/:speaker/wink', (req, res) => {
-    wink = !wink;
-    res.send(req.speaker.monitor.sendCommand('Speaker/wink', wink ? 0 : 1));
+app.param('band', function(req, res, next, id) {
+    if (req.path.includes('graphic_eq')) {
+        if (id < 1 || id > 31) {
+            res.status(404).send({ error: 'graphic eq band must be in range: 1..31'});
+        }
+    } else if (req.path.includes('notch_eq')) {
+        if (id < 1 || id > 8) {
+            res.status(404).send({ error: 'notch eq band must be in range: 1..8'});
+        }
+    } else if (req.path.includes('parametric_eq')) {
+        if (id < 1 || id > 8) {
+            res.status(404).send({ error: 'parametric eq band must be in range: 1..8'});
+        }
+    }
+    req.band = id;
+    next();
 });
 
 app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
-    wink = !wink;
     res.send(req.speaker.monitor.sendCommand(req.params["endpoint"], parseFloat(req.params["value"])));
 });
 
-app.post('/speaker/:speaker/contour', (req, res) => {
-    const value = getValueFromBodyOrSend400(req, res, 'value', ['normal', 'lbr_source', 'floor_monitor']);
-    switch (value) {
-        case 'normal':
-            req.speaker.monitor.sendCommand('Speaker/contour', 0);
-            break;
-        case 'lbr_source':
-            req.speaker.monitor.sendCommand('Speaker/contour', 0.5);
-            break;
-        case 'floor_monitor':
-            req.speaker.monitor.sendCommand('Speaker/contour', 1);
-            break;
-    }
+// SWITCH ENDPOINTS
+
+const handleSwitchEndpoint = (req, res, endpoint, map) => {
+    const inputValue = getValueFromBodyOrSend400(req, res, 'value', map.keys());
+    const commandValue = shared.getValueFromMap(map, inputValue);
+    req.speaker.monitor.sendCommand(endpoint, commandValue);
     res.sendStatus(201);
+};
+
+app.post('/speaker/:speaker/contour', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/contour', contourMap);
 });
+
+app.post('/speaker/:speaker/delay/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/delay_enable', onOffMap);
+});
+
+app.post('/speaker/:speaker/gain/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/volume_enable', onOffMap);
+});
+
+app.post('/speaker/:speaker/graphic_eq/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/geq/on', onOffMap);
+});
+
+app.post('/speaker/:speaker/high_pass_filter/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/75hz', onOffMap);
+});
+
+app.post('/speaker/:speaker/limiter/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/limit/limiteron', onOffMap);
+});
+
+app.post('/speaker/:speaker/mute/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/mute', onOffMap);
+});
+
+app.post('/speaker/:speaker/notch_eq/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/notch/notchallon', onOffMap);
+});
+
+app.post('/speaker/:speaker/notch_eq/:band/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, `Speaker/line/ch1/notch/notchbandon${req.band}`, onOffMap);
+});
+
+app.post('/speaker/:speaker/parametric_eq/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/line/ch1/eq/eqallon', onOffMap);
+});
+
+app.post('/speaker/:speaker/parametric_eq/:band/enable', (req, res) => {
+    handleSwitchEndpoint(req, res, `Speaker/line/ch1/eq/eqbandon${req.band}`, onOffMap);
+});
+
+app.post('/speaker/:speaker/wink', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/wink', winkMap);
+});
+
+/*
+
+
+    "Speaker/line/ch1/delay": "0..1", //Actual range is 0..500 ms
+    "Speaker/line/ch1/eq/eqfreq1": "0..1", //Param EQ1 Freq.  Actual range is 20..20,000 Hz
+    "Speaker/line/ch1/eq/eqfreq8": "0..1", //Param EQ8 Freq.  Actual range is 20..20,000 Hz
+    "Speaker/line/ch1/eq/eqgain1": "0..1", //Param EQ1 Gain.  Actual range is -15..15 dB
+    "Speaker/line/ch1/eq/eqgain8": "0..1", //Param EQ8 Gain.  Actual range is -15..15 dB
+    "Speaker/line/ch1/eq/eqq1": "0..1", //Actual range is 0.10..4
+    "Speaker/line/ch1/eq/eqq8": "0..1", //Actual range is 0.10..4
+    "Speaker/line/ch1/geq/gain1": "0..1",  //Graphic EQ01 Gain.  Actual range is -16..16 dB
+    "Speaker/line/ch1/geq/gain31": "0..1", //Graphic EQ31 Gain.  Actual range is -16..16 dB
+    "Speaker/line/ch1/limit/threshold": "0..1", //actual range is -28..0 dB
+    "Speaker/line/ch1/notch/notchfreq1": "0..1", //Notch EQ1 Freq.  Actual range is 20..20,000 Hz
+    "Speaker/line/ch1/notch/notchfreq8": "0..1", //Notch EQ8 Freq.  Actual range is 20..20,000 Hz
+    "Speaker/line/ch1/notch/notchgain1": "0..1", //Notch EQ1 Gain.  Actual range is -48..0 dB
+    "Speaker/line/ch1/notch/notchgain8": "0..1", //Notch EQ8 Gain.  Actual range is -48..0 dB
+    "Speaker/line/ch1/volume": "0..1", //Actual range is -84..10 dB
+    "Speaker/presetloading": "0", //seems to show while the speaker is muted to change modes
+    "Speaker/remote_lim_on": "0/1", //follows Speaker/line/ch1/limit/limiteron
+    "Speaker/remote_notch_on": "0/1", //follows Speaker/line/ch1/notch/notchallon
+    "Speaker/remote_geq_on": "0/1", //follows Speaker/line/ch1/geq/on
+    "Speaker/remote_peq_on": "0/1", //follows Speaker/line/ch1/eq/eqallon
+    "Speaker/remotelayeron": "0/1", //User mode Enable
+    "Speaker/signal": "0/1", //Speaker signal LED flash
+    "Speaker/clip": "0/1", //speaker digital clip LED flash
+    "Speaker/limit": "0/1", //Speaker limit LED flash?
+*/
 
 //not found route
 app.use((req, res, next) => {
@@ -79,43 +163,3 @@ app.use((err, req, res, next) => {
 //start server
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-/*
-"Speaker/75hz": "0..1",  //100Hz high pass filter on/off
-    "Speaker/contour": "0/0.5/1", //0: Normal, 0.5: LBR Source, 1: Floor Monitor
-    "Speaker/clip": "0/1", //speaker digital clip LED flash
-    "Speaker/limit": "0/1", //Speaker limit LED flash?
-    "Speaker/line/ch1/delay": "0..1", //Actual range is 0..500 ms
-    "Speaker/line/ch1/delay_enable": "0/1",
-    "Speaker/line/ch1/eq/eqallon": "0/1", //Param EQ Enable
-    "Speaker/line/ch1/eq/eqbandon1": "0/1", //Param EQ1 Enable
-    "Speaker/line/ch1/eq/eqbandon8": "0/1", //Param EQ8 Enable
-    "Speaker/line/ch1/eq/eqfreq1": "0..1", //Param EQ1 Freq.  Actual range is 20..20,000 Hz
-    "Speaker/line/ch1/eq/eqfreq8": "0..1", //Param EQ8 Freq.  Actual range is 20..20,000 Hz
-    "Speaker/line/ch1/eq/eqgain1": "0..1", //Param EQ1 Gain.  Actual range is -15..15 dB
-    "Speaker/line/ch1/eq/eqgain8": "0..1", //Param EQ8 Gain.  Actual range is -15..15 dB
-    "Speaker/line/ch1/eq/eqq1": "0..1", //Actual range is 0.10..4
-    "Speaker/line/ch1/eq/eqq8": "0..1", //Actual range is 0.10..4
-    "Speaker/line/ch1/geq/on": "0/1", //Graphic EQ Enable
-    "Speaker/line/ch1/geq/gain1": "0..1",  //Graphic EQ01 Gain.  Actual range is -16..16 dB
-    "Speaker/line/ch1/geq/gain31": "0..1", //Graphic EQ31 Gain.  Actual range is -16..16 dB
-    "Speaker/line/ch1/limit/limiteron": "0/1",
-    "Speaker/line/ch1/limit/threshold": "0..1", //actual range is -28..0 dB
-    "Speaker/line/ch1/mute": "0/1",
-    "Speaker/line/ch1/notch/notchallon": "0/1", //Notch EQ Enable
-    "Speaker/line/ch1/notch/notchbandon1": "0/1", //Notch EQ1 Enable
-    "Speaker/line/ch1/notch/notchbandon8": "0/1", //Notch EQ8 Enable
-    "Speaker/line/ch1/notch/notchfreq1": "0..1", //Notch EQ1 Freq.  Actual range is 20..20,000 Hz
-    "Speaker/line/ch1/notch/notchfreq8": "0..1", //Notch EQ8 Freq.  Actual range is 20..20,000 Hz
-    "Speaker/line/ch1/notch/notchgain1": "0..1", //Notch EQ1 Gain.  Actual range is -48..0 dB
-    "Speaker/line/ch1/notch/notchgain8": "0..1", //Notch EQ8 Gain.  Actual range is -48..0 dB
-    "Speaker/line/ch1/volume": "0..1", //Actual range is -84..10 dB
-    "Speaker/line/ch1/volume_enable": "0/1",
-    "Speaker/presetloading": "0", //seems to show while the speaker is muted to change modes
-    "Speaker/remote_lim_on": "0/1", //follows Speaker/line/ch1/limit/limiteron
-    "Speaker/remote_notch_on": "0/1", //follows Speaker/line/ch1/notch/notchallon
-    "Speaker/remote_geq_on": "0/1", //follows Speaker/line/ch1/geq/on
-    "Speaker/remote_peq_on": "0/1", //follows Speaker/line/ch1/eq/eqallon
-    "Speaker/remotelayeron": "0/1", //User mode Enable
-    "Speaker/signal": "0/1", //Speaker signal LED flash
-    "Speaker/wink": "0/1" //Front LED Color.  0: Blue, 1:White
-*/

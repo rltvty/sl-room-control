@@ -27,3 +27,11 @@ describe('getValueOrError', function() {
     });
 });
 
+describe('getValueFromMap', function() {
+    it('should return a value or null', function() {
+        shared.getValueFromMap({'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1}, 'normal').should.equal(0);
+        should.equal(shared.getValueFromMap({'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1}, 'taco'), null);
+        shared.getValueFromMap({'off': 0, 'on': 1}, 'on').should.equal(1);
+        shared.getValueFromMap({'blue': 0, 'white': 1}, 'blue').should.equal(0);
+    })
+});

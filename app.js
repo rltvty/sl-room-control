@@ -11,7 +11,6 @@ const contourMap = {'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1};
 const onOffMap = {'off': 0, 'on': 1};
 const winkMap = {'blue': 0, 'white': 1};
 
-
 const getValueFromBodyOrSend400 = (req, res, paramName, validChoices) => {
     const valueOrError = shared.getValueOrError(req.body, paramName, validChoices);
     if (valueOrError instanceof  Error) {
@@ -20,7 +19,6 @@ const getValueFromBodyOrSend400 = (req, res, paramName, validChoices) => {
         return valueOrError;
     }
 };
-
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -66,7 +64,7 @@ app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
 // SWITCH ENDPOINTS
 
 const handleSwitchEndpoint = (req, res, endpoint, map) => {
-    const inputValue = getValueFromBodyOrSend400(req, res, 'value', map.keys());
+    const inputValue = getValueFromBodyOrSend400(req, res, 'value', Object.keys(map));
     const commandValue = shared.getValueFromMap(map, inputValue);
     req.speaker.monitor.sendCommand(endpoint, commandValue);
     res.sendStatus(201);
@@ -128,8 +126,8 @@ app.post('/speaker/:speaker/wink', (req, res) => {
     "Speaker/line/ch1/eq/eqfreq8": "0..1", //Param EQ8 Freq.  Actual range is 20..20,000 Hz
     "Speaker/line/ch1/eq/eqgain1": "0..1", //Param EQ1 Gain.  Actual range is -15..15 dB
     "Speaker/line/ch1/eq/eqgain8": "0..1", //Param EQ8 Gain.  Actual range is -15..15 dB
-    "Speaker/line/ch1/eq/eqq1": "0..1", //Actual range is 0.10..4
-    "Speaker/line/ch1/eq/eqq8": "0..1", //Actual range is 0.10..4
+    "Speaker/line/ch1/eq/eqq1": "0..1", //Param EQ1 Q. Actual range is 0.10..4
+    "Speaker/line/ch1/eq/eqq8": "0..1", //Param EQ8 Q. Actual range is 0.10..4
     "Speaker/line/ch1/geq/gain1": "0..1",  //Graphic EQ01 Gain.  Actual range is -16..16 dB
     "Speaker/line/ch1/geq/gain31": "0..1", //Graphic EQ31 Gain.  Actual range is -16..16 dB
     "Speaker/line/ch1/limit/threshold": "0..1", //actual range is -28..0 dB

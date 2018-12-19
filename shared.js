@@ -143,3 +143,34 @@ module.exports.getValueFromMap = (map, input) => {
     }
     return null;
 };
+
+module.exports.getCommandValueFromActualValue = (kind, inputValue) => {
+   return 0;
+};
+
+roundDigits = (number, digits) => {
+    const factor = Math.pow(10, digits);
+    return Math.round(number * factor) / factor;
+};
+
+module.exports.getActualValueFromCommandValue = (kind, inputValue) => {
+    switch (kind) {
+        case 'delay':
+            return roundDigits(500 * inputValue, 1).toString() + ' ms';
+        case 'eq_freq':
+            const value = 20 * Math.exp(6.91 * inputValue);
+            if (value < 100) {
+                return roundDigits(value, 2).toString() + ' Hz';
+            } else if (value < 1000) {
+                return roundDigits(value, 1).toString() + ' Hz';
+            } else if (value < 20000) {
+                return roundDigits(value/1000, 2).toString() + ' kHz';
+            } else {
+                return "20 kHz"; //calculates to 20.04 kHz
+            }
+        case 'para_gain':
+            return roundDigits((30 * inputValue) - 15, 2).toString() + ' dB';
+        default:
+            return 0;
+    }
+};

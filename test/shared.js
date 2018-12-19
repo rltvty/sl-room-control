@@ -36,7 +36,7 @@ describe('getValueFromMap', function() {
     })
 });
 
-describe('getCommandValueFromInputValue', function() {
+describe('getActualValueFromCommandValue', function() {
     describe('type: delay ms', function () {
         it('should return the proper string representation', function () {
             shared.getActualValueFromCommandValue('delay', 0).should.equal('0 ms');
@@ -75,6 +75,53 @@ describe('getCommandValueFromInputValue', function() {
             shared.getActualValueFromCommandValue('para_gain', 0.8270270228385925).should.equal('9.81 dB');
             shared.getActualValueFromCommandValue('para_gain', 0.9621621370315552).should.equal('13.86 dB');
             shared.getActualValueFromCommandValue('para_gain', 1).should.equal('15 dB');
+        });
+    });
+});
+
+describe('getCommandValueFromActualValue', function() {
+    describe('type: delay ms', function () {
+        it('should return the proper float value', function () {
+            shared.getCommandValueFromActualValue('delay', '-10 ms').should.equal(0);
+            shared.getCommandValueFromActualValue('delay', '0 ms').should.equal(0);
+            shared.getCommandValueFromActualValue('delay', '79.3 ms').should.equal(0.15860000252723694);
+            shared.getCommandValueFromActualValue('delay', '256.1 ms').should.equal(0.5121999979019165);
+            shared.getCommandValueFromActualValue('delay', '317.1 ms').should.equal(0.6341999769210815);
+            shared.getCommandValueFromActualValue('delay', '381.1 ms').should.equal(0.7621999979019165);
+            shared.getCommandValueFromActualValue('delay', '454.3 ms').should.equal(0.9085999727249146);
+            shared.getCommandValueFromActualValue('delay', '500 ms').should.equal(1);
+            shared.getCommandValueFromActualValue('delay', '750 ms').should.equal(1);
+        })
+    });
+    describe('type: eq band freq in Hz (parametric & notch)', function () {
+        it('should return the proper float value', function () {
+            shared.getCommandValueFromActualValue('eq_freq', '10 Hz').should.equal(0);
+            shared.getCommandValueFromActualValue('eq_freq', '20 Hz').should.equal(0);
+            shared.getCommandValueFromActualValue('eq_freq', '30.16 Hz').should.equal(0.059447795152664185);
+            shared.getCommandValueFromActualValue('eq_freq', '50.88 Hz').should.equal(0.135128453373909);
+            shared.getCommandValueFromActualValue('eq_freq', '111.5 Hz').should.equal(0.24866747856140137);
+            shared.getCommandValueFromActualValue('eq_freq', '645.1 Hz').should.equal(0.5027023553848267);
+            shared.getCommandValueFromActualValue('eq_freq', '1.36 kHz').should.equal(0.6106378436088562);
+            shared.getCommandValueFromActualValue('eq_freq', '3.21 kHz').should.equal(0.734919548034668);
+            shared.getCommandValueFromActualValue('eq_freq', '8.49 kHz').should.equal(0.8756746649742126);
+            shared.getCommandValueFromActualValue('eq_freq', '16.02 kHz').should.equal(0.9675630927085876);
+            shared.getCommandValueFromActualValue('eq_freq', '20 kHz').should.equal(0.9996751546859741);
+            shared.getCommandValueFromActualValue('eq_freq', '30 kHz').should.equal(1);
+        });
+    });
+    describe('type: parametric eq gain in dB', function () {
+        it('should return the proper string representation', function () {
+            shared.getCommandValueFromActualValue('para_gain', '-15 dB').should.equal(0);
+            shared.getCommandValueFromActualValue('para_gain', '-13.38 dB').should.equal(0.05400000140070915);
+            shared.getCommandValueFromActualValue('para_gain', '-7.7 dB').should.equal(0.2433333396911621);
+            shared.getCommandValueFromActualValue('para_gain', '-3.49 dB').should.equal(0.38366666436195374);
+            shared.getCommandValueFromActualValue('para_gain', '-1.22 dB').should.equal(0.4593333303928375);
+            shared.getCommandValueFromActualValue('para_gain', '0 dB').should.equal(0.5);
+            shared.getCommandValueFromActualValue('para_gain', '2.84 dB').should.equal(0.5946666598320007);
+            shared.getCommandValueFromActualValue('para_gain', '5.92 dB').should.equal(0.6973333358764648);
+            shared.getCommandValueFromActualValue('para_gain', '9.81 dB').should.equal(0.8270000219345093);
+            shared.getCommandValueFromActualValue('para_gain', '13.86 dB').should.equal(0.9620000123977661);
+            shared.getCommandValueFromActualValue('para_gain', '15 dB').should.equal(1);
         });
     });
 });

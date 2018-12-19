@@ -144,21 +144,17 @@ module.exports.getValueFromMap = (map, input) => {
     return null;
 };
 
-module.exports.getCommandValueFromActualValue = (kind, inputValue) => {
-   return 0;
-};
-
 roundDigits = (number, digits) => {
     const factor = Math.pow(10, digits);
     return Math.round(number * factor) / factor;
 };
 
-module.exports.getActualValueFromCommandValue = (kind, inputValue) => {
+module.exports.getActualValueFromCommandValue = (kind, commandValue) => {
     switch (kind) {
         case 'delay':
-            return roundDigits(500 * inputValue, 1).toString() + ' ms';
+            return roundDigits(500 * commandValue, 1).toString() + ' ms';
         case 'eq_freq':
-            const value = 20 * Math.exp(6.91 * inputValue);
+            const value = 20 * Math.exp(6.91 * commandValue);
             if (value < 100) {
                 return roundDigits(value, 2).toString() + ' Hz';
             } else if (value < 1000) {
@@ -169,8 +165,36 @@ module.exports.getActualValueFromCommandValue = (kind, inputValue) => {
                 return "20 kHz"; //calculates to 20.04 kHz
             }
         case 'para_gain':
-            return roundDigits((30 * inputValue) - 15, 2).toString() + ' dB';
+            return roundDigits((30 * commandValue) - 15, 2).toString() + ' dB';
         default:
             return 0;
     }
+};
+
+module.exports.getCommandValueFromActualValue = (kind, actualValue) => {
+    let value = parseFloat(actualValue);
+    switch (kind) {
+        case 'delay':
+            value = value / 500;
+            break;
+        case 'eq_freq':
+            if (actualValue.includes('kHz')) {
+                value = value * 1000;
+            }
+            value = Math.log(value / 20) / 6.91;
+            //const value = 20 * Math.exp(6.91 * inputValue);
+            break;
+        case 'para_gain':
+            value = (value + 15) / 30;
+            break;
+        default:
+            return 0;
+    }
+    if (value < 0) {
+        value = 0;
+    }
+    if (value > 1) {
+        value = 1
+    }
+    return Math.fround(value);
 };

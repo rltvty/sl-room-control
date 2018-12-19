@@ -39,8 +39,28 @@ module.exports.monitor = (device, data) => {
         //console.log(`Level now at ${data.level} from ${data.source}`);
     });
 
+    const decodingMap = {
+        'Speaker/line/ch1/delay' : 'delay',
+        'Speaker/line/ch1/eq/eqfreq' : 'eq_freq',
+        'Speaker/line/ch1/eq/eqgain' : 'para_gain',
+        'Speaker/line/ch1/notch/notchfreq' : 'eq_freq',
+    };
+
     speakerEvents.on('settings', (data) => {
-        console.log(`${data.endpoint} set to ${data.value} from ${data.source}`);
+        let actualValue = null;
+        if (data.hasOwnProperty('endpoint')) {
+            for (let key in decodingMap) {
+                if (decodingMap.hasOwnProperty(key) && data['endpoint'].includes(key)) {
+                    actualValue = shared.getActualValueFromCommandValue(decodingMap[key], data.value);
+                    break;
+                }
+            }
+        }
+        if (actualValue) {
+            console.log(`${data.endpoint} set to ${actualValue} (${data.value}) from ${data.source}`);
+        } else {
+            console.log(`${data.endpoint} set to ${data.value} from ${data.source}`);
+        }
     });
 
     speakerEvents.on('unknown', (data) => {

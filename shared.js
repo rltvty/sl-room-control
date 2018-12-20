@@ -26,34 +26,55 @@ module.exports.decodeData = (data, source) => {
         switch (data.readUInt16LE(6)) {
             case 16708:
                 return {
-                    source : source,
-                    mode : "broadcast",
-                    port : data.readUInt16LE(4),
-                    model : data.toString("ascii", 16, 28).replace(findNulls,' ').trim(),
+                    source: source,
+                    mode: "broadcast",
+                    port: data.readUInt16LE(4),
+                    model: data.toString("ascii", 16, 28).replace(findNulls, ' ').trim(),
                     address: data.toString("ascii", 28, 45)
                 };
             case 21325:
                 return {
-                    source : source,
-                    mode: "level",
+                    source: source,
+                    mode: "input_level",
                     level: data.readUInt16LE(20)
                 };
             case 22096:
                 const len = data.readUInt16LE(4);
                 return {
-                    source : source,
+                    source: source,
                     mode: "settings",
-                    endpoint: data.toString("ascii", 12, len + 2).replace(findNulls,'').trim(),
+                    endpoint: data.toString("ascii", 12, len + 2).replace(findNulls, '').trim(),
                     value: data.readFloatLE(len + 2)
                 };
             default:
-                return {
-                    source : source,
-                    mode: "unknown",
-                    type: data.readUInt16LE(6),
-                    hex: data.toString('hex', 8),
-                    ascii: data.toString('ascii', 8),
-                    trimmed: data.toString('ascii', 8).replace(findNulls,'').trim()
+                switch (data.toString('ascii', 12, 16)) {
+                    case 'levl':
+                        return {
+                            source: source,
+                            mode: "output_level",
+                            level: data.readUInt8(21)
+                        };
+                    case 'redu':
+                        return {
+                            source: source,
+                            mode: "redu",
+                            type: data.readUInt16LE(6),
+                            level: data.readUInt8(10),
+                            hex: data.toString('hex', 0),
+                            ascii: data.toString('ascii', 12, 16),
+                            trimmed: data.toString('ascii', 0).replace(findNulls, '').trim()
+                        };
+                    default:
+                        return {
+                            source: source,
+                            mode: "unknown",
+                            type: data.readUInt16LE(6),
+                            guess_len : data.readUInt16LE(4),
+                            actual_len : data.length,
+                            hex: data.toString('hex', 0),
+                            ascii: data.toString('ascii', 12, 16),
+                            trimmed: data.toString('ascii', 0).replace(findNulls, '').trim()
+                        }
                 }
         }
     }

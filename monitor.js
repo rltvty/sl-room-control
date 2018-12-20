@@ -9,7 +9,6 @@ module.exports.monitor = (device, data) => {
     const monitor = pcap.createSession(device, filter);
     const speakerEvents = new eventEmitter();
     const conn = connection.connection(data, speakerEvents);
-    let wink = false;
 
     monitor.on("packet", (raw_packet) => {
         const packet = pcap.decode.packet(raw_packet);
@@ -21,10 +20,6 @@ module.exports.monitor = (device, data) => {
 
     speakerEvents.on('open', () => {
         console.log('Speaker Connected');
-        /*setInterval(() => {
-            sendCommand('Speaker/wink', wink ? 0 : 1);
-            wink = !wink;
-        }, 5000)*/
     });
 
     speakerEvents.on('close', () => {
@@ -35,8 +30,12 @@ module.exports.monitor = (device, data) => {
         console.log(error);
     });
 
-    speakerEvents.on('level', (data) => {
-        //console.log(`Level now at ${data.level} from ${data.source}`);
+    speakerEvents.on('input_level', (data) => {
+        //console.log(`Input Level now at ${data.level} from ${data.source}`);
+    });
+
+    speakerEvents.on('output_level', (data) => {
+        //console.log(`Output Level now at ${data.level} from ${data.source}`);
     });
 
     const decodingMap = {
@@ -63,8 +62,12 @@ module.exports.monitor = (device, data) => {
         }
     });
 
-    speakerEvents.on('unknown', (data) => {
+    speakerEvents.on('redu', (data) => {
         //console.log(data);
+    });
+
+    speakerEvents.on('unknown', (data) => {
+        console.log(data);
     });
 
     const sendCommand = (endpoint, value) => {

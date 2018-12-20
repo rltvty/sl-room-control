@@ -36,11 +36,11 @@ module.exports.endpoints = {
     "Speaker/remote_peq_on": "0/1", //follows Speaker/line/ch1/eq/eqallon
     "Speaker/remotelayeron": "0/1", //User mode Enable
     "Speaker/signal": "0/1", //Speaker signal LED flash
-    "Speaker/wink": "0/1" //Front LED Color.  0: Blue, 1:White
+    "Speaker/wink": "0/1", //Front LED Color.  0: Blue, 1:White
+    "Speaker/excursion": "0/1", //Speaker excursion warning
 };
 
 /* Missing but expected:
-Something about excursion 0/1
 Something about amp temp
 Something about digital peak 0/1
 Something about limiter hitting 0/1

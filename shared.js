@@ -21,6 +21,21 @@ module.exports.getNetworkDevices = () => {
     return choices;
 };
 
+const hexFormatter = (buf) => {
+    let line = '';
+    for (let i = 0; i < buf.length; i += 1) {
+        line += buf.toString('hex', i, i+1);
+        if ((i+1) % 32 === 0) {
+            line += '\n';
+        } else if ((i+1) % 4 === 0) {
+            line += " ";
+        } else {
+            line += ":";
+        }
+    }
+    return line + '\n\n';
+};
+
 module.exports.decodeData = (data, source) => {
     if (data && data.length > 20 && data.toString("ascii", 0, 2) === "UC") {
         switch (data.readUInt16LE(6)) {
@@ -68,12 +83,10 @@ module.exports.decodeData = (data, source) => {
                         return {
                             source: source,
                             mode: "unknown",
-                            type: data.readUInt16LE(6),
-                            guess_len : data.readUInt16LE(4),
                             actual_len : data.length,
-                            hex: data.toString('hex', 0),
-                            ascii: data.toString('ascii', 12, 16),
-                            trimmed: data.toString('ascii', 0).replace(findNulls, '').trim()
+                            //hex: hexFormatter(data),
+                            base64: data.toString('base64'),
+                            decoded: atob(data.toString('base64'))
                         }
                 }
         }

@@ -2,6 +2,7 @@ const eventEmitter = require('events');
 const pcap = require("pcap");
 const shared = require("./shared.js");
 const connection = require("./connection");
+const fs = require("fs");
 
 module.exports.monitor = (device, data) => {
 
@@ -55,11 +56,14 @@ module.exports.monitor = (device, data) => {
                 }
             }
         }
+        let output;
         if (actualValue) {
-            console.log(`${data.endpoint} set to ${actualValue} (${data.value}) from ${data.source}`);
+            output = `${data.endpoint} set to ${actualValue} (${data.value}) from ${data.source}`;
         } else {
-            console.log(`${data.endpoint} set to ${data.value} from ${data.source}`);
+            output = `${data.endpoint} set to ${data.value} from ${data.source}`;
         }
+        console.log(output);
+        //fs.appendFileSync('./subscription_reply.log', output + '\n\n');
     });
 
     speakerEvents.on('redu', (data) => {
@@ -67,6 +71,7 @@ module.exports.monitor = (device, data) => {
     });
 
     speakerEvents.on('unknown', (data) => {
+        //fs.appendFileSync('./subscription_reply.log', data.hex);
         console.log(data);
     });
 

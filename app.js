@@ -1,8 +1,10 @@
 const endpoints = require('./experiments/endpoints.js');
-const locator = require('./locator.js');
+//const locator = require('./locator.js');
 const shared = require('./shared.js');
 const bodyParser = require('body-parser');
 const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 
 const app = express();
 const port = 3000;
@@ -60,6 +62,15 @@ app.param('band', function(req, res, next, id) {
 app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
     res.send(req.speaker.monitor.sendCommand(req.params["endpoint"], parseFloat(req.params["value"])));
 });
+
+app.post('/test', (req, res) => {
+    console.log(req.body);
+    if ('level' in req.body && returnSocket != null) {
+        returnSocket.send(req.body.level);
+    }
+    res.sendStatus(200);
+});
+
 
 // SWITCH ENDPOINTS
 
@@ -158,6 +169,17 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
+const server = http.createServer(app);
+
+const wss = new WebSocket.Server({ server });
+
+let returnSocket = null;
+
+wss.on('connection', function(ws, request) {
+    returnSocket = ws;
+});
+
+
 //start server
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+server.listen(port, () => console.log(`Example app listening on port ${port}!`));
 

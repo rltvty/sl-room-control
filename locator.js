@@ -6,6 +6,20 @@ const shared = require("./shared.js");
 const speakers = {};
 const speakerEvents = new eventEmitter();
 
+speakerEvents.on('new', (data) => {
+    console.log(`Found new Speaker: ${data.model} at ${data.sender}:${data.port} with address: ${data.mac_address}`);
+    data.monitor = monitors.monitor(device, data);
+    speakers[data.mac_address] = data;
+});
+
+let mixer = null;
+let mixerEvents = new eventEmitter();
+
+mixerEvents.on('new', (data) => {
+    console.log(`Found new Mixer: ${data.model} at ${data.sender}:${data.port}`);
+    mixer = data;
+});
+
 const devices = shared.getNetworkDevices();
 let device = null;
 switch (devices.length) {
@@ -24,22 +38,27 @@ switch (devices.length) {
 
 const speakerWatch = pcap.createSession(device, "ip broadcast");
 
-speakerEvents.on('new', (data) => {
-    console.log(`Found new ${data.model} at ${data.sender}:${data.port} with name: ${data.name}`);
-    data.monitor = monitors.monitor(device, data);
-    speakers[data.address] = data;
-});
-
 speakerWatch.on("packet", function (raw_packet) {
     const packet = pcap.decode.packet(raw_packet);
     const data = shared.decodeData(shared.getData(packet), "locator.js");
     if (data) {
         switch (data.mode) {
             case 'broadcast':
-                if (!(data.address in speakers)) {
-                    data.sender = shared.getSender(packet);
-                    speakerEvents.emit('new', Object.assign(data, shared.getSpeakerDetails(data.address)));
+                switch (data.type) {
+                    case "speaker":
+                        if (!(data.mac_address in speakers)) {
+                            data.sender = shared.getSender(packet);
+                            speakerEvents.emit('new', Object.assign(data, shared.getSpeakerDetails(data.mac_address)));
+                        }
+                        break;
+                    case "mixer":
+                        if (mixer === null) {
+                            data.sender = shared.getSender(packet);
+                            mixerEvents.emit('new', data)
+                        }
+                        break;
                 }
+
                 break;
             default:
                 console.log(data);
@@ -51,11 +70,11 @@ speakerWatch.on("packet", function (raw_packet) {
 
 module.exports.speakers = () => {
     const list = [];
-    for (const address in speakers) {
-        if (speakers.hasOwnProperty(address)) {
-            const speaker = speakers[address];
+    for (const mac_address in speakers) {
+        if (speakers.hasOwnProperty(mac_address)) {
+            const speaker = speakers[mac_address];
             list.push({
-                'address': address,
+                'mac_address': mac_address,
                 'ip': speaker.sender,
                 'model': speaker.model,
                 'name': speaker.name,

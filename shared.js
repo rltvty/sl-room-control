@@ -36,17 +36,15 @@ const hexFormatter = (buf) => {
     return line + '\n\n';
 };
 
-module.exports.decodeData = (data, source) => {
+module.exports.decodeData = (data, source) => { //source is `locator.js`, `connection.js`, or `monitor.js`
     if (data && data.length > 20 && data.toString("ascii", 0, 2) === "UC") {
         switch (data.readUInt16LE(6)) {
             case 16708:
-                return {
-                    source: source,
-                    mode: "broadcast",
-                    port: data.readUInt16LE(4),
-                    model: data.toString("ascii", 16, 28).replace(findNulls, ' ').trim(),
-                    address: data.toString("ascii", 28, 45)
-                };
+                if (data.length <= 50) {
+                    return decodeSpeakerBroadcast(data, source)
+                } else {
+                    return decodeMixerBroadcast(data, source)
+                }
             case 21325:
                 return {
                     source: source,
@@ -86,7 +84,7 @@ module.exports.decodeData = (data, source) => {
                             actual_len : data.length,
                             //hex: hexFormatter(data),
                             base64: data.toString('base64'),
-                            decoded: atob(data.toString('base64'))
+                            decoded: Buffer.from(data.toString('base64'), 'base64').toString('binary')
                         }
                 }
         }
@@ -94,12 +92,12 @@ module.exports.decodeData = (data, source) => {
     return null;
 };
 
-module.exports.getSpeakerDetails = (address) => {
-    if (speaker_config.hasOwnProperty(address)) {
-        return speaker_config[address]
+module.exports.getSpeakerDetails = (mac_address) => {
+    if (speaker_config.hasOwnProperty(mac_address)) {
+        return speaker_config[mac_address]
     } else {
         return {
-            name: address,
+            mac_address: mac_address,
             description: "Pls add this speaker to `speaker_config.json`"
         }
     }
@@ -232,3 +230,47 @@ module.exports.getCommandValueFromActualValue = (kind, actualValue) => {
     }
     return Math.fround(value);
 };
+
+// Example speaker broadcasts:
+
+// 'UC\u0000\u0001¢æDAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL18sAI\u0000SPK\u000000:0A:92:C8:0B:EF\u0000\u0000'
+// 'UC\u0000\u0001 ãDAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL315AI\u0000SPK\u000000:0A:92:C8:33:87\u0000\u0000'
+// 'UC\u0000\u0001+¢DAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL328AI\u0000SPK\u000000:0A:92:D7:04:10\u0000\u0000'
+// 'UC\u0000\u0001E¡DAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL328AI\u0000SPK\u000000:0A:92:D6:66:EE\u0000\u0000'
+// 'UC\u0000\u0001ÕÙDAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL328AI\u0000SPK\u000000:0A:92:D6:66:BB\u0000\u0000'
+// 'UC\u0000\u0001ÔÆDAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL315AI\u0000SPK\u000000:0A:92:C8:33:09\u0000\u0000'
+// 'UC\u0000\u0001\u000e©DAd\u0000\u0000\u0000\u0000\u0000\u0000\u0000SL18sAI\u0000SPK\u000000:0A:92:A9:19:0C\u0000\u0000'
+
+function decodeSpeakerBroadcast (data, source) {
+    return {
+        source: source,
+        mode: "broadcast",
+        port: data.readUInt16LE(4),
+        model: data.toString("ascii", 16, 28).replace(findNulls, ' ').trim(),
+        mac_address: data.toString("ascii", 28, 45),
+        type: "speaker"
+    };
+}
+
+/* Example Mixer Broadcast:
+{ actual_len: 75,
+  hex:
+   '55:43:00:01 08:cf:44:41 65:00:00:00 00:00:00:80 da:55:b3:49 12:b6:a0:40 99:55:ea:b6 f6:de:ac:b7
+    53:74:75:64 69:6f:4c:69 76:65:20:52 4d:31:36:20 41:49:2f:31 00:41:55:44 00:32:39:37 35:32:39:35
+    37:34:37:37 32:34:34:33 35:00:00',
+  base64:
+   'VUMAAQjPREFlAAAAAAAAgNpVs0kStqBAmVXqtvberLdTdHVkaW9MaXZlIFJNMTYgQUkvMQBBVUQAMjk3NTI5NTc0NzcyNDQzNQAA',
+  decoded:
+   'UC\u0000\u0001\bÏDAe\u0000\u0000\u0000\u0000\u0000\u0000 ÚU³I\u0012¶ @ Uê¶öÞ¬·StudioLive RM16 AI/1\u0000AUD\u00002975295747724435\u0000\u0000'
+ }
+
+*/
+function decodeMixerBroadcast(data, source) {
+    return {
+        source: source,
+        mode: "broadcast",
+        port: data.readUInt16LE(4),
+        model: data.toString("ascii", 32, 50).replace(findNulls, ' ').trim(),
+        type: "mixer"
+    };
+}

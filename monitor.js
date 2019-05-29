@@ -72,7 +72,7 @@ module.exports.monitor = (device, data) => {
 
     speakerEvents.on('unknown', (data) => {
         //fs.appendFileSync('./subscription_reply.log', data.hex);
-        console.log(data);
+        //console.log(data);
     });
 
     const sendCommand = (endpoint, value) => {

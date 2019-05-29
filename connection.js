@@ -15,22 +15,22 @@ module.exports.connection = (speakerInfo, speakerEvents) => {
             client.write(init_request);
             client.write(subscription_request);
             setInterval(() => { client.write(keep_alive); }, 3000);
-            speakerEvents.emit('open');
+            speakerEvents.emit('open', null, speakerInfo);
         });
 
         client.on('data', (tcpData) => {
             const data = shared.decodeData(tcpData, "connection.js");
             if (data) {
-                speakerEvents.emit(data.mode, data);
+                speakerEvents.emit(data.mode, data, speakerInfo);
             }
         });
 
         client.on('close', () => {
-            speakerEvents.emit('close')
+            speakerEvents.emit('close', null, speakerInfo)
         });
 
         client.on('error', (error) => {
-            speakerEvents.emit('error', error);
+            speakerEvents.emit('error', error, speakerInfo);
         });
 
         return client;

@@ -14,7 +14,7 @@ module.exports.monitor = (device, speakerInfo) => {
         const packet = pcap.decode.packet(raw_packet);
         const data = shared.decodeData(shared.getData(packet), "monitor.js");
         if (data) {
-            speakerEvents.emit(data.mode, {data: data, speakerInfo: speakerInfo});
+            speakerEvents.emit(data.mode, data, speakerInfo);
         }
     });
 

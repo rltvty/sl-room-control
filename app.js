@@ -3,6 +3,8 @@ const locator = require('./locator.js');
 const shared = require('./shared.js');
 const bodyParser = require('body-parser');
 const express = require('express');
+const http = require('http');
+const webSocket = require('ws');
 
 const app = express();
 const port = 3000;
@@ -158,6 +160,14 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
+const server = http.createServer(app);
+
+const wss = new webSocket.Server({ server });
+
+wss.on('connection', function(ws, request) {
+    locator.setWebSocket(ws);
+});
+
 //start server
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+server.listen(port, () => console.log(`Example app listening on port ${port}!`));
 

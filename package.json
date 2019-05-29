@@ -5,7 +5,7 @@
     "body-parser": "~1.18.3",
     "express": "^4.16.4",
     "pcap": "~2.1.0",
-    "websocket": "^1.0.28"
+    "ws": "^7.0.0"
   },
   "description": "An API for controlling PreSonus StudioLive Speakers",
   "main": "app.js",

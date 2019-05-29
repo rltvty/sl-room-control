@@ -1,15 +1,17 @@
 const eventEmitter = require('events');
 const pcap = require("pcap");
 const monitors = require("./monitor.js");
+const eventPusher = require("./eventPusher.js");
 const shared = require("./shared.js");
 
 const speakers = {};
 const speakerEvents = new eventEmitter();
 
-speakerEvents.on('new', (data) => {
-    console.log(`Found new Speaker: ${data.model} at ${data.sender}:${data.port} with address: ${data.mac_address}`);
-    data.monitor = monitors.monitor(device, data);
-    speakers[data.mac_address] = data;
+speakerEvents.on('new', (speakerInfo) => {
+    console.log(`Found new Speaker: ${speakerInfo.model} at ${speakerInfo.sender}:${speakerInfo.port} with address: ${speakerInfo.mac_address}`);
+    speakerInfo.monitor = monitors.monitor(device, speakerInfo);
+    eventPusher.subscribeSpeaker(speakerInfo.monitor.speakerEvents);
+    speakers[speakerInfo.mac_address] = speakerInfo;
 });
 
 let mixer = null;
@@ -58,7 +60,6 @@ speakerWatch.on("packet", function (raw_packet) {
                         }
                         break;
                 }
-
                 break;
             default:
                 console.log(data);
@@ -97,4 +98,8 @@ module.exports.getSpeaker = (addressOrName) => {
         }
     }
     return null;
+};
+
+module.exports.setWebSocket = (webSocket) => {
+    eventPusher.setWebSocket(webSocket);
 };

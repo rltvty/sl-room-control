@@ -2,77 +2,20 @@ const eventEmitter = require('events');
 const pcap = require("pcap");
 const shared = require("./shared.js");
 const connection = require("./connection");
-const fs = require("fs");
 
-module.exports.monitor = (device, data) => {
+module.exports.monitor = (device, speakerInfo) => {
 
-    const filter = `src host ${data.sender} && not ip broadcast && udp`;
+    const filter = `src host ${speakerInfo.sender} && not ip broadcast && udp`;
     const monitor = pcap.createSession(device, filter);
     const speakerEvents = new eventEmitter();
-    const conn = connection.connection(data, speakerEvents);
+    const conn = connection.connection(speakerInfo, speakerEvents);
 
     monitor.on("packet", (raw_packet) => {
         const packet = pcap.decode.packet(raw_packet);
         const data = shared.decodeData(shared.getData(packet), "monitor.js");
         if (data) {
-            speakerEvents.emit(data.mode, data);
+            speakerEvents.emit(data.mode, {data: data, speakerInfo: speakerInfo});
         }
-    });
-
-    speakerEvents.on('open', () => {
-        console.log('Speaker Connected');
-    });
-
-    speakerEvents.on('close', () => {
-        console.log('Speaker Disconnected');
-    });
-
-    speakerEvents.on('error', (error) => {
-        console.log(error);
-    });
-
-    speakerEvents.on('input_level', (data) => {
-        //console.log(`Input Level now at ${data.level} from ${data.source}`);
-    });
-
-    speakerEvents.on('output_level', (data) => {
-        //console.log(`Output Level now at ${data.level} from ${data.source}`);
-    });
-
-    const decodingMap = {
-        'Speaker/line/ch1/delay' : 'delay',
-        'Speaker/line/ch1/eq/eqfreq' : 'eq_freq',
-        'Speaker/line/ch1/eq/eqgain' : 'para_gain',
-        'Speaker/line/ch1/notch/notchfreq' : 'eq_freq',
-    };
-
-    speakerEvents.on('settings', (data) => {
-        let actualValue = null;
-        if (data.hasOwnProperty('endpoint')) {
-            for (let key in decodingMap) {
-                if (decodingMap.hasOwnProperty(key) && data['endpoint'].includes(key)) {
-                    actualValue = shared.getActualValueFromCommandValue(decodingMap[key], data.value);
-                    break;
-                }
-            }
-        }
-        let output;
-        if (actualValue) {
-            output = `${data.endpoint} set to ${actualValue} (${data.value}) from ${data.source}`;
-        } else {
-            output = `${data.endpoint} set to ${data.value} from ${data.source}`;
-        }
-        console.log(output);
-        //fs.appendFileSync('./subscription_reply.log', output + '\n\n');
-    });
-
-    speakerEvents.on('redu', (data) => {
-        //console.log(data);
-    });
-
-    speakerEvents.on('unknown', (data) => {
-        //fs.appendFileSync('./subscription_reply.log', data.hex);
-        //console.log(data);
     });
 
     const sendCommand = (endpoint, value) => {
@@ -81,7 +24,8 @@ module.exports.monitor = (device, data) => {
     };
 
     return {
-        sendCommand : sendCommand
+        sendCommand : sendCommand,
+        speakerEvents: speakerEvents
     }
 };
 

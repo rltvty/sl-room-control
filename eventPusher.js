@@ -5,9 +5,12 @@ let returnWebSocket = null;
 
 const eventEmitters = [];
 
-pushEvent = (event, data, speakerInfo) => {
+pushEvent = (json) => {
     if (returnWebSocket) {
-        returnWebSocket.send(JSON.stringify({event:event, data:data, speakerInfo:speakerInfo}));
+        returnWebSocket.send(JSON.stringify(json));
+        if (json.event_name !== 'input_level') {
+            console.log(json);
+        }
     }
 };
 
@@ -30,7 +33,14 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
         //data is always null for `open` event
         setImmediate(() => {
             console.log(`Speaker ${speakerInfo.mac_address} Connected`);
-            pushEvent('open', data, speakerInfo);
+            pushEvent({
+                event_name:'open',
+                mac_address: speakerInfo.mac_address,
+                ip: speakerInfo.sender,
+                port: speakerInfo.port,
+                model: speakerInfo.model,
+                type: speakerInfo.type
+            });
         });
     });
 
@@ -38,28 +48,39 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
         //data is always null for `close` event
         setImmediate(() => {
             console.log(`Speaker ${speakerInfo.mac_address} Disconnected`);
-            pushEvent('close', data, speakerInfo);
+            pushEvent({
+                event_name: 'close',
+                mac_address: speakerInfo.mac_address
+            });
         });
     });
 
     speakerEvents.on('error', (error, speakerInfo) => {
         setImmediate(() => {
             console.log(error, speakerInfo);
-            pushEvent('error', error, speakerInfo);
+            pushEvent({event_name:'error', data:error, speakerInfo:speakerInfo});
         });
     });
 
     speakerEvents.on('input_level', (data, speakerInfo) => {
         setImmediate(() => {
             //console.log(`Input Level now at ${data.level} from ${data.source} for ${speakerInfo.mac_address}`);
-            pushEvent('input_level', data, speakerInfo);
+            pushEvent({
+                event_name:'input_level',
+                mac_address: speakerInfo.mac_address,
+                level: data.level
+            });
         });
     });
 
     speakerEvents.on('output_level', (data, speakerInfo) => {
         setImmediate(() => {
             console.log(`Output Level now at ${data.level} from ${data.source} for ${speakerInfo.mac_address}`);
-            pushEvent('output_level', data, speakerInfo);
+            pushEvent({
+                event_name:'output_level',
+                mac_address: speakerInfo.mac_address,
+                level: data.level
+            });
         });
     });
 
@@ -75,14 +96,20 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
                 }
             }
             let output;
+            let json = {
+                event_name:'settings',
+                mac_address: speakerInfo.mac_address,
+                endpoint: data.endpoint,
+                value: data.value
+            };
             if (actualValue) {
                 output = `${data.endpoint} set to ${actualValue} (${data.value}) from ${data.source} for ${speakerInfo.mac_address}`;
-                data.actualValue = actualValue
+                json.actual_value = actualValue;
             } else {
                 output = `${data.endpoint} set to ${data.value} from ${data.source} for ${speakerInfo.mac_address}`;
             }
             console.log(output);
-            pushEvent('settings', data, speakerInfo);
+            pushEvent(json);
             //fs.appendFileSync('./subscription_reply.log', output + '\n\n');
         });
     });
@@ -90,7 +117,7 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
     speakerEvents.on('redu', (data, speakerInfo) => {
         setImmediate(() => {
             //console.log(data);
-            //pushEvent('redu', data, speakerInfo);
+            //pushEvent({event_name:'redu', data:data, speakerInfo:speakerInfo});
         });
     });
 
@@ -98,7 +125,7 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
         setImmediate(() => {
             //fs.appendFileSync('./subscription_reply.log', data.hex);
             //console.log(data);
-            //pushEvent('unknown', data, speakerInfo);
+            //pushEvent({event_name:'unknown', data:data, speakerInfo:speakerInfo});
         });
     });
 };

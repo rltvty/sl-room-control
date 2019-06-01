@@ -26,8 +26,14 @@ var volume_down = Buffer.from('554300011a005056720065006c696e652f6368322f6175783
 // universal-control UCPVreline/ch2/aux2Ï¯=?
 var volume___up = Buffer.from('554300011a005056720065006c696e652f6368322f61757832000000cfaf3d3f', 'hex'); //universal-control
 
+//endpoint: 'aux/ch1/volume' => 0.7349397540092468
+var rear_l_up = Buffer.from('554300011b005056720065006175782f6368312f766f6c756d6500000003253c3f', 'hex');
+
+//endpoint: 'aux/ch1/volume' => 0.7349397540092468
+var rear_l_down = Buffer.from('554300011b005056720065006175782f6368312f766f6c756d6500000000000000', 'hex');
+
 var client = new net.Socket({'allowHalfOpen': true});
-client.connect(53000, '192.168.0.114', function() {
+client.connect(53000, '10.10.10.236', function() {
     console.log('Connected');
     client.write(init_request);
     setTimeout(function()  {
@@ -43,22 +49,37 @@ client.connect(53000, '192.168.0.114', function() {
         }, 3000);
         setInterval(function() {
             client.write(volume___up);
+            //client.write(rear_l_up);
             console.log('volume up');
         }, 6000);
         setTimeout(function()  {
             setInterval(function() {
                 client.write(volume_down);
+                //client.write(rear_l_down);
                 console.log('volume down');
             }, 6000);
         }, 3000);
     }, 500);
     console.log('Data written');
 });
+const findNulls = new RegExp("\u0000", "g");
+const zeroDb = new Buffer.from("03253c3f"); //0.7349397540092468
 
 client.on('data', function(data) {
     console.log('Data Received: ');
     console.log(data);
-    //console.log(Buffer.from(data, 'hex').toString())
+    if (data && data.length > 20 && data.toString("ascii", 0, 2) === "UC") {
+        switch (data.readUInt16LE(6)) {
+            case 22096:
+                const len = data.readUInt16LE(4);
+                console.log({
+                    mode: "settings",
+                    endpoint: data.toString("ascii", 12, len + 2).replace(findNulls, '').trim(),
+                    value: data.readFloatLE(len + 2)
+                });
+                break;
+        }
+    }
 });
 
 client.on('close', function() {

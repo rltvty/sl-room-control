@@ -133,3 +133,10 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
         });
     });
 };
+
+/* Temperature events (from a 315 speaker):
+Speaker/temperature_f set to 0.4386792480945587 from connection.js for 00:0A:92:D6:66:EE
+Speaker/temperature_c set to 0.4406779706478119 from connection.js for 00:0A:92:D6:66:EE
+Speaker/temperature_f set to 0.4669811427593231 from connection.js for 00:0A:92:D6:66:EE
+Speaker/temperature_c set to 0.4661017060279846 from connection.js for 00:0A:92:D6:66:EE
+ */

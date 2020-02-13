@@ -81,7 +81,9 @@ module.exports.subscribeSpeaker = (speakerEvents) => {
             } else {
                 output = `${data.endpoint} set to ${data.value} from ${data.source} for ${speakerInfo.mac_address}`;
             }
-            console.log(output);
+            //if (data.endpoint != "Speaker/signal") {
+                console.log(output);
+            //}
             pushEvent('settings', data, speakerInfo);
             //fs.appendFileSync('./subscription_reply.log', output + '\n\n');
         });

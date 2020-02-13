@@ -20,6 +20,7 @@ module.exports.monitor = (device, speakerInfo) => {
 
     const sendCommand = (endpoint, value) => {
         conn.write(shared.getCommand(endpoint, value));
+        console.log("writing value: "  + value + " to endpoint: " + endpoint);
         return true;
     };
 

@@ -97,3 +97,43 @@ Frequencies:
   Band 30: 16k
   Band 31: 20k
  */
+
+/*
+DEBUGGING by trying to connect WORX tool to speaker, unsuccesfully.  But found 'digitalin' endpoint for dante control
+Speaker/monosum.......UC..$.PVd.f.
+Speaker/remote_notch_on.......UC....PVd.f.
+Speaker/line/ch1/notch/notchallon.......UC..".PVd.f." +
+Speaker/remote_geq_on.......UC..$.PVd.f.
+Speaker/line/ch1/geq/on.......UC....PVd.f.
+Speaker/digitalin......?UC..$.PVd.f.
+Speaker/line/ch1/volume....A5?UC..+.PVd.f.
+Speaker/line/ch1/volume_enable.......UC..#.PVd.f.
+Speaker/line/ch1/delay.......UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype1.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq1...&nH?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqfreq1...}.">UC..*.PVd.f." +
+Speaker/line/ch1/eq/eqbandop1.......UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype2.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq2......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype3.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq3......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqfreq3...%..>UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype4.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq4......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype5.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq5......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype6.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq6......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype7.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq7......?UC..(.PVd.f.
+Speaker/line/ch1/eq/eqtype8.......UC..%.PVd.f.
+Speaker/line/ch1/eq/eqq8...&nH?UC..*.PVd.f.
+Speaker/line/ch1/eq/eqbandop8.......UC....PVd.f.
+Speaker/line/ch1/notch/notchfreq1...}.">UC....PVd.f.
+Speaker/line/ch1/notch/notchfreq3...%..>UC....KAf.d.UC....PVd.f.
+Speaker/wink.
+Speaker/line/ch1/eq/eqfreq1...z.">UC..(.PVd.f.
+Speaker/line/ch1/eq/eqfreq3...$..>UC....PVd.f.
+Speaker/line/ch1/notch/notchfreq1...z.">UC....PVd.f.
+Speaker/line/ch1/notch/notchfreq3
+*/

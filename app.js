@@ -10,6 +10,9 @@ const app = express();
 const port = 3000;
 
 const contourMap = {'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1};
+//I would expect there to be an 'analog_failover; level too, but it appears that only 0.5 allows dante to work
+//more experimentation is needed here
+const inputMap = {'analog_only': 0, 'dante': 0.5};
 const onOffMap = {'off': 0, 'on': 1};
 const winkMap = {'blue': 0, 'white': 1};
 
@@ -90,6 +93,10 @@ app.post('/speaker/:speaker/graphic_eq/enable', (req, res) => {
 
 app.post('/speaker/:speaker/high_pass_filter/enable', (req, res) => {
     handleSwitchEndpoint(req, res, 'Speaker/75hz', onOffMap);
+});
+
+app.post('/speaker/:speaker/input', (req, res) => {
+    handleSwitchEndpoint(req, res, 'Speaker/digitalin', inputMap);
 });
 
 app.post('/speaker/:speaker/limiter/enable', (req, res) => {

@@ -1,3 +1,5 @@
 {
-  "00:0A:92:D6:66:BB" : { "name": "Test", "description" : "Current test speaker in Eric's bedroom" }
+  "00:0A:92:D6:66:BB" : { "name": "Test", "description" : "Current test speaker in Eric's bedroom" },
+  "00:0A:92:D7:04:10" : { "name": "CenterFrontMain", "description" : "328ai front center main" },
+  "00:0A:92:D6:66:EE" : { "name": "RightFrontMain", "description" : "328ai front right main" }
 }

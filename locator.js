@@ -86,18 +86,21 @@ module.exports.speakers = () => {
     return list;
 };
 
-module.exports.getSpeaker = (addressOrName) => {
+module.exports.getSpeakers = (addressOrName) => {
+    if (addressOrName == "all") {
+        return Object.values(speakers);
+    }
     if (addressOrName in speakers) {
-        return speakers[addressOrName];
+        return [speakers[addressOrName]];
     }
     for (let address in speakers) {
         if (speakers.hasOwnProperty(address)) {
             if (speakers[address].name === addressOrName) {
-                return speakers[address];
+                return [speakers[address]];
             }
         }
     }
-    return null;
+    return [];
 };
 
 module.exports.setWebSocket = (webSocket) => {

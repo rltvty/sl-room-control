@@ -12,7 +12,7 @@ const port = 3000;
 const contourMap = {'normal': 0, 'lbr_source': 0.5, 'floor_monitor': 1};
 //I would expect there to be an 'analog_failover; level too, but it appears that only 0.5 allows dante to work
 //more experimentation is needed here
-const inputMap = {'analog_only': 0, 'dante': 0.5};
+const inputMap = {'analog_only': 1, 'dante': 0.5, 'failover': 0};
 const onOffMap = {'off': 0, 'on': 1};
 const winkMap = {'blue': 0, 'white': 1};
 
@@ -35,9 +35,9 @@ app.get('/endpoints', (req, res) => res.send(endpoints.endpoints));
 app.get('/speakers', (req, res) => res.send(locator.speakers()));
 
 app.param('speaker', function(req, res, next, id) {
-    const speaker = locator.getSpeaker(id);
-    if (speaker) {
-        req.speaker = speaker;
+    const speakers = locator.getSpeakers(id);
+    if (speakers.length > 0) {
+        req.speakers = speakers;
         next();
     } else {
         res.status(404).send({ error: 'speaker not found'});
@@ -63,7 +63,13 @@ app.param('band', function(req, res, next, id) {
 });
 
 app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
-    res.send(req.speaker.monitor.sendCommand(req.params["endpoint"], parseFloat(req.params["value"])));
+    var results = []
+    
+    for (var index in req.speakers) {
+        results.push(req.speakers[index].monitor.sendCommand(req.params["endpoint"], parseFloat(req.params["value"])))
+    }
+
+    res.send(results);
 });
 
 // SWITCH ENDPOINTS
@@ -71,7 +77,10 @@ app.post('/speaker/:speaker/endpoint/:endpoint/value/:value', (req, res) => {
 const handleSwitchEndpoint = (req, res, endpoint, map) => {
     const inputValue = getValueFromBodyOrSend400(req, res, 'value', Object.keys(map));
     const commandValue = shared.getValueFromMap(map, inputValue);
-    req.speaker.monitor.sendCommand(endpoint, commandValue);
+    for (var index in req.speakers) {
+        req.speakers[index].monitor.sendCommand(endpoint, commandValue);
+    }
+    
     res.sendStatus(201);
 };
 
